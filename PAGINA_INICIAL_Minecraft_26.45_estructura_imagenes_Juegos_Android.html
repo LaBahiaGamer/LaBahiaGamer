@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xxXGamer15Xxx - Versión Pro</title>
+    <style>
+        :root {
+            --bg-color: #0f111a;
+            --container-bg: #151824;
+            --accent-color: #ff1744;
+            --emulator-btn-color: #00e676;
+            --text-color: #ffffff;
+            --text-muted: #8b949e;
+            --border-color: #21263d;
+            --warning-color: #ffcc00; /* Amarillo para el peso */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+
+        body { background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* --- CABECERA --- */
+        header { 
+            background-color: var(--container-bg); 
+            border-bottom: 2px solid var(--accent-color); 
+            padding: 20px 40px;
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .header-container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            gap: 20px;
+        }
+
+        .site-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-nav { 
+            background: transparent; border: 1px solid var(--border-color); color: var(--text-color); 
+            padding: 12px 24px; border-radius: 6px; cursor: pointer; transition: all 0.3s;
+        }
+        .btn-nav.active { background-color: var(--accent-color); border-color: var(--accent-color); }
+
+        .search-container input {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            outline: none;
+            width: 250px;
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 20px 15px; }
+            .header-container { flex-direction: column; justify-content: center; align-items: center; gap: 15px; }
+            .nav-buttons { width: 100%; justify-content: center; flex-wrap: wrap; }
+            .btn-nav { flex-grow: 1; max-width: 110px; padding: 10px 12px; font-size: 14px; }
+            .search-container { width: 100%; display: flex; justify-content: center; }
+            .search-container input { width: 100%; max-width: 320px; text-align: center; }
+        }
+
+        /* --- CUERPO --- */
+        main { max-width: 1200px; width: 100%; margin: 0 auto; padding: 60px 40px; flex-grow: 1; }
+
+        @media (max-width: 768px) {
+            main { padding: 30px 15px; }
+        }
+
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        .games-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 520px) {
+            .games-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+            }
+
+            .game-img-container {
+                aspect-ratio: 16 / 9;
+                height: auto;
+            }
+
+            .game-info {
+                padding: 10px;
+            }
+
+            .game-title-text {
+                font-size: 15px;
+            }
+
+            .game-categories {
+                font-size: 11px;
+            }
+
+            .game-card-footer {
+                font-size: 11px;
+            }
+        }
+
+        /* --- ESTILOS DE LA TARJETA DEL JUEGO CON ETIQUETAS --- */
+        .game-card { 
+            background: var(--container-bg); 
+            border-radius: 10px; 
+            overflow: hidden; 
+            cursor: pointer; 
+            border: 1px solid var(--border-color); 
+            transition: transform 0.2s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .game-card:hover { transform: scale(1.03); }
+
+        .game-img-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+        }
+
+        .game-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Badge Superior Derecha */
+        .badge-top-right {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.75);
+            color: var(--text-color);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid var(--border-color);
+        }
+
+        .game-info {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+        }
+
+        .game-title-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .game-categories {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        .game-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* Inferior Izquierda */
+        .badge-bottom-left {
+            color: var(--text-color);
+            background: #21263d;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Inferior Derecha (Amarillo) */
+        .badge-bottom-right {
+            color: var(--warning-color);
+        }
+
+        /* --- ESTILOS VISTA DETALLE DEL JUEGO --- */
+        .game-detail-container {
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .game-detail-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 12px;
+        }
+
+        .game-detail-body {
+            line-height: 1.8;
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 25px;
+        }
+
+        .game-detail-body p {
+            margin-bottom: 15px;
+        }
+
+        /* Botón AQUÍ */
+        .btn-aqui {
+            background-color: #2b3047;
+            color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 25px;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+        .btn-aqui:hover { background-color: #3b4261; }
+
+        /* --- MODAL FLOTANTE --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 17, 26, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal-content {
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .modal-close:hover { color: var(--text-color); }
+
+        .specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            background: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .specs-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .specs-table tr:last-child td { border-bottom: none; }
+
+        .specs-table td:first-child {
+            color: var(--text-muted);
+            font-weight: 600;
+            width: 35%;
+        }
+
+        .copy-field-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hidden-copy-input { position: absolute; left: -9999px; opacity: 0; }
+        .text-placeholder { font-size: 14px; color: var(--text-color); }
+
+        .btn-copy {
+            background: var(--border-color);
+            border: none;
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-copy:hover { background: #313854; }
+
+        .btn-download-game {
+            background-color: var(--accent-color);
+            color: #fff;
+            text-align: center;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            display: block;
+            transition: opacity 0.2s;
+        }
+        .btn-download-game:hover { opacity: 0.9; }
+
+        .btn-back {
+            background: var(--border-color);
+            color: var(--text-color);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background 0.2s;
+        }
+        .btn-back:hover { background: #313854; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-container">
+        <div class="site-title">xxXGamer15Xxx</div>
+        <nav class="nav-buttons">
+            <button class="btn-nav active" id="btn-inicio" onclick="navigate('inicio')">Inicio</button>
+            <button class="btn-nav" id="btn-categorias" onclick="navigate('categorias')">Categorías</button>
+            <button class="btn-nav" id="btn-dmca" onclick="navigate('dmca')">DMCA</button>
+        </nav>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Buscar en todo..." oninput="searchGlobal()" onkeydown="if(event.key === 'Enter'){event.preventDefault(); this.blur();}">
+        </div>
+    </div>
+</header>
+
+<main id="contentArea">
+    <div id="all-games-container" class="games-list" style="margin-bottom: 30px;"></div>
+
+    <!-- SECCIÓN: INICIO -->
+    <section id="view-inicio" class="view-section active">
+        <h2>Inicio</h2>
+        <div class="games-list" style="margin-top: 20px;">
+            <div class="game-card" onclick="navigate('android')">
+                <div class="game-img-container">
+                    <img src="foto1.jpg" class="game-img">
+                </div>
+                <div class="game-info">
+                    <div class="game-title-text">Juegos Android</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VISTA: SECCIÓN JUEGOS ANDROID -->
+    <section id="view-android" class="view-section">
+        <button class="btn-back" onclick="navigate('inicio')">← Volver a Inicio</button>
+        <h2>Juegos Android</h2>
+        <div class="games-list" style="margin-top: 20px;">
+            
+            <!-- TARJETA DAY ZOMBIE CON ETIQUETAS SOLICITADAS -->
+            <div class="game-card" onclick="navigate('day-zombie')">
+                <div class="game-img-container">
+                    <img src="imagenes/Juegos Android/Day Zombie.webp" class="game-img">
+                    <div class="badge-top-right">Android</div>
+                </div>
+                <div class="game-info">
+                    <div class="game-title-text">Day Zombie</div>
+                    <div class="game-categories">Acción, Supervivencia, Multijugador Online</div>
+                    <div class="game-card-footer">
+                        <span class="badge-bottom-left">APK</span>
+                        <span class="badge-bottom-right">307 MB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TARJETA MINECRAFT BEDROCK 26.45 -->
+            <div class="game-card" onclick="openMinecraftDetail()">
+                <div class="game-img-container">
+                    <img src="imagenes/Juegos Android/Minecraft Bedrock 26.45.png" class="game-img">
+                    <div class="badge-top-right">Android</div>
+                </div>
+                <div class="game-info">
+                    <div class="game-title-text">Minecraft Bedrock 26.45</div>
+                    <div class="game-categories">Aventura, Supervivencia, Sandbox</div>
+                    <div class="game-card-footer">
+                        <span class="badge-bottom-left">APK</span>
+                        <span class="badge-bottom-right">808 MB</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECCIÓN: CATEGORÍAS -->
+    <section id="view-categorias" class="view-section">
+        <h2>Categorías</h2>
+        <p style="color: var(--text-muted); margin-top: 15px;">Sección en desarrollo.</p>
+    </section>
+
+    <!-- SECCIÓN: DMCA -->
+    <section id="view-dmca" class="view-section">
+        <h2>DMCA</h2>
+        <p style="color: var(--text-muted); margin-top: 15px;">Sección informativa legal en desarrollo.</p>
+    </section>
+
+    <!-- DETALLE DEL JUEGO: DAY ZOMBIE -->
+    <section id="view-day-zombie" class="view-section">
+        <button class="btn-back" onclick="navigate('android')">← Volver a Juegos Android</button>
+        
+        <div class="game-detail-container">
+            <h1 class="game-detail-title">Day Zombie</h1>
+
+            <div class="game-detail-body">
+                <p>Day Zombi Survival es un juego de supervivencia postapocalíptico totalmente online donde cada jugador debe explorar un vasto mundo abierto, recolectar recursos y enfrentarse a los peligros que acechan en el mapa. La experiencia se puede jugar en primera o tercera persona, lo que te permite elegir la perspectiva que mejor se adapte a tu estilo de juego.</p>
+                <p>A lo largo del juego, los jugadores pueden encontrar y equiparse con diferentes tipos de ropa, tanto militar como civil, así como usar diversas armas. Las armas también pueden equiparse con accesorios, lo que permite crear diferentes combinaciones de equipo según la situación y el estilo de cada jugador.</p>
+            </div>
+
+            <button class="btn-aqui" onclick="openModal('dayZombieModal')">AQUÍ</button>
+        </div>
+    </section>
+
+    <!-- DETALLE DEL JUEGO: MINECRAFT BEDROCK 26.45 -->
+    <section id="view-minecraft-26-45" class="view-section">
+        <button class="btn-back" onclick="navigate('android')">← Volver a Juegos Android</button>
+        <div class="game-detail-container">
+            <h1 class="game-detail-title">Minecraft Bedrock 26.45</h1>
+            <div class="game-detail-body">
+                <p>Minecraft Bedrock 26.45 para Android. Consulta los detalles del archivo antes de descargarlo.</p>
+            </div>
+            <button class="btn-aqui" onclick="openModal('minecraft2645Modal')">AQUÍ</button>
+        </div>
+    </section>
+
+</main>
+
+<!-- MODAL FLOTANTE CON DETALLES -->
+<div id="dayZombieModal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'dayZombieModal')">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('dayZombieModal')">✖</button>
+        
+        <table class="specs-table">
+            <tr>
+                <td>Peso:</td>
+                <td>307 MB</td>
+            </tr>
+            <tr>
+                <td>Formato:</td>
+                <td>APK</td>
+            </tr>
+            <tr>
+                <td>Enlace:</td>
+                <td>
+                    <div class="copy-field-container">
+                        <span class="text-placeholder">Copiar enlace</span>
+                        <input type="text" id="linkDayZombie" class="hidden-copy-input" readonly value="https://enlace-descarga-dayzombie.com">
+                        <button class="btn-copy" onclick="copyToClipboard('linkDayZombie', this)">📋 Copiar</button>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div>
+            <a href="https://enlace-descarga-dayzombie.com" target="_blank" class="btn-download-game">Descargar Juego</a>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL FLOTANTE: MINECRAFT BEDROCK 26.45 -->
+<div id="minecraft2645Modal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'minecraft2645Modal')">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('minecraft2645Modal')">✖</button>
+
+        <h2 style="margin-bottom: 20px;">Minecraft Bedrock 26.45</h2>
+
+        <table class="specs-table">
+            <tr>
+                <td>Peso:</td>
+                <td>808 MB</td>
+            </tr>
+            <tr>
+                <td>Formato:</td>
+                <td>APK</td>
+            </tr>
+            <tr>
+                <td>Enlace:</td>
+                <td>
+                    <div class="copy-field-container">
+                        <span class="text-placeholder">Copiar enlace</span>
+                        <input type="text" id="linkMinecraft2645" class="hidden-copy-input" readonly value="https://enlace-descarga-minecraft-26-45.com">
+                        <button class="btn-copy" onclick="copyToClipboard('linkMinecraft2645', this)">📋 Copiar</button>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div>
+            <a href="https://enlace-descarga-minecraft-26-45.com" target="_blank" class="btn-download-game">Descargar Juego</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        // Crea un estado inicial REAL en el historial.
+        // Así el botón físico "Atrás" de Android vuelve a Inicio
+        // en lugar de sacar al usuario de la página.
+        const savedView = sessionStorage.getItem('currentView') || 'inicio';
+        const initialView = document.getElementById('view-' + savedView)
+            ? savedView
+            : 'inicio';
+
+        window.history.replaceState(
+            { view: initialView },
+            '',
+            window.location.href
+        );
+
+        navigate(initialView, false);
+    };
+
+    function navigate(view, updateHistory = true) {
+        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
+        document.getElementById('all-games-container').innerHTML = '';
+
+        const targetSection = document.getElementById('view-' + view);
+        if(targetSection) targetSection.classList.add('active');
+
+        const btn = document.getElementById('btn-' + view);
+        if(btn) btn.classList.add('active');
+
+        // Guarda la sección actual para poder recuperarla después de una recarga.
+        sessionStorage.setItem('currentView', view);
+
+        if(updateHistory) {
+            window.history.pushState({view}, '');
+        }
+    }
+
+    function openMinecraftDetail() {
+        navigate('minecraft-26-45');
+        openModal('minecraft2645Modal');
+    }
+
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if(modal) {
+            modal.classList.add('open');
+
+            // Añade una entrada al historial para que el botón Atrás
+            // cierre primero el recuadro de detalles.
+            window.history.pushState(
+                {
+                    view: sessionStorage.getItem('currentView') || 'inicio',
+                    modal: modalId
+                },
+                ''
+            );
+        }
+    }
+
+    function closeModal(modalId, fromHistory = false) {
+        const modal = document.getElementById(modalId);
+        if(modal) modal.classList.remove('open');
+
+        // Cuando se cierra manualmente, elimina también la entrada
+        // correspondiente del historial.
+        if(!fromHistory && window.history.state && window.history.state.modal === modalId) {
+            window.history.back();
+        }
+    }
+
+    function closeModalOnOverlay(event, modalId) {
+        if(event.target.id === modalId) {
+            closeModal(modalId);
+        }
+    }
+
+    function searchGlobal() {
+        const searchInput = document.getElementById('searchInput');
+        const term = searchInput.value.toLowerCase();
+        const container = document.getElementById('all-games-container');
+        container.innerHTML = '';
+        
+        if(term === '') {
+            navigate('inicio', false);
+            return;
+        }
+
+        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+        
+        const originalCards = document.querySelectorAll('.view-section .game-card');
+        let matches = 0;
+
+        originalCards.forEach(card => {
+            const titleText = card.innerText.toLowerCase();
+            if (titleText.includes(term)) {
+                const clone = card.cloneNode(true);
+                clone.onclick = card.onclick; 
+                container.appendChild(clone);
+                matches++;
+            }
+        });
+
+        if (matches === 0) {
+            container.innerHTML = '<p style="color: var(--text-muted); padding: 20px;">No se encontraron juegos que coincidan con tu búsqueda.</p>';
+        }
+    }
+
+    function copyToClipboard(inputId, buttonElement) {
+        const input = document.getElementById(inputId);
+        input.select();
+        input.setSelectionRange(0, 99999);
+
+        navigator.clipboard.writeText(input.value).then(() => {
+            const originalText = buttonElement.innerHTML;
+            buttonElement.innerHTML = "¡Copiado!";
+            buttonElement.style.background = "#00e676";
+            buttonElement.style.color = "#000";
+            
+            setTimeout(() => {
+                buttonElement.innerHTML = originalText;
+                buttonElement.style.background = "var(--border-color)";
+                buttonElement.style.color = "var(--text-color)";
+            }, 1500);
+        }).catch(err => {
+            console.error('Error al copiar: ', err);
+        });
+    }
+
+    window.onpopstate = (e) => {
+        // Al usar Atrás/Adelante del navegador, primero cerramos
+        // cualquier modal que esté abierto.
+        document.querySelectorAll('.modal-overlay.open').forEach(modal => {
+            modal.classList.remove('open');
+        });
+
+        // Después mostramos la sección correspondiente al estado del historial.
+        if(e.state && e.state.view) {
+            navigate(e.state.view, false);
+        } else {
+            navigate('inicio', false);
+        }
+    };
+</script>
+</body>
+</html>
+

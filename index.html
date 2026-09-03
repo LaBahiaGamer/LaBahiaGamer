@@ -477,7 +477,7 @@
             -->
 
             <!-- TARJETA: PC -->
-            <div class="game-card" style="cursor: default;">
+            <div class="game-card" onclick="navigate('pc')">
                 <div class="game-img-container">
                     <img src="imagenes/inicio/PC.jpg" class="game-img">
                 </div>
@@ -553,6 +553,18 @@
                 <div>Más juegos próximamente</div>
             </div>
 
+        </div>
+    </section>
+
+    <!-- SECCIÓN: JUEGOS PC -->
+    <section id="view-pc" class="view-section">
+        <button class="btn-back" onclick="navigate('inicio')">← Volver a Inicio</button>
+        <h2>Juegos PC</h2>
+        <div class="games-list" style="margin-top: 20px;">
+            <div class="game-card-placeholder">
+                <div class="placeholder-icon">+</div>
+                <div>Juegos de PC próximamente</div>
+            </div>
         </div>
     </section>
 
@@ -768,45 +780,52 @@
 
 <script>
     window.onload = function() {
-        // Crea un estado inicial REAL en el historial.
-        // Así el botón físico "Atrás" de Android vuelve a Inicio
-        // en lugar de sacar al usuario de la página.
+        // Lee la sección desde el enlace (#android, #pc, etc.).
+        // Si no existe un enlace válido, conserva la sección guardada.
+        const hashView = decodeURIComponent(window.location.hash.substring(1));
         const savedView = sessionStorage.getItem('currentView') || 'inicio';
-        const initialView = document.getElementById('view-' + savedView)
-            ? savedView
-            : 'inicio';
+        const initialView = document.getElementById('view-' + hashView)
+            ? hashView
+            : (document.getElementById('view-' + savedView) ? savedView : 'inicio');
 
         window.history.replaceState(
             { view: initialView },
             '',
-            window.location.href
+            window.location.pathname + window.location.search + (initialView === 'inicio' ? '' : '#' + initialView)
         );
 
         navigate(initialView, false);
     };
 
     function navigate(view, updateHistory = true) {
+        const targetSection = document.getElementById('view-' + view);
+        if(!targetSection) return;
+
         document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
         document.getElementById('all-games-container').innerHTML = '';
+        targetSection.classList.add('active');
 
-        const targetSection = document.getElementById('view-' + view);
-        if(targetSection) targetSection.classList.add('active');
-
-        if(view === 'recientes') {
-            renderRecientes();
-        }
+        if(view === 'recientes') renderRecientes();
 
         const btn = document.getElementById('btn-' + view);
         if(btn) btn.classList.add('active');
 
-        // Guarda la sección actual para poder recuperarla después de una recarga.
         sessionStorage.setItem('currentView', view);
 
         if(updateHistory) {
-            window.history.pushState({view}, '');
+            const newUrl = window.location.pathname + window.location.search + (view === 'inicio' ? '' : '#' + view);
+            window.history.pushState({view}, '', newUrl);
         }
     }
+
+    // Permite abrir directamente una sección usando su enlace con #.
+    window.addEventListener('hashchange', () => {
+        const view = decodeURIComponent(window.location.hash.substring(1)) || 'inicio';
+        if(document.getElementById('view-' + view)) {
+            navigate(view, false);
+        }
+    });
 
     function openMinecraftDetail() {
         navigate('minecraft-26-45');
@@ -940,19 +959,19 @@
     }
 
     window.onpopstate = (e) => {
-        // Al usar Atrás/Adelante del navegador, primero cerramos
-        // cualquier modal que esté abierto.
+        // Cierra cualquier modal al usar Atrás/Adelante.
         document.querySelectorAll('.modal-overlay.open').forEach(modal => {
             modal.classList.remove('open');
-
-            // Pausa cualquier video que estuviera reproduciéndose.
             const video = modal.querySelector('video');
             if(video) video.pause();
         });
 
-        // Después mostramos la sección correspondiente al estado del historial.
-        if(e.state && e.state.view) {
-            navigate(e.state.view, false);
+        const view = (e.state && e.state.view)
+            || decodeURIComponent(window.location.hash.substring(1))
+            || 'inicio';
+
+        if(document.getElementById('view-' + view)) {
+            navigate(view, false);
         } else {
             navigate('inicio', false);
         }
